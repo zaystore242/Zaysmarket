@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Panel - Zay Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f9fa; --text-color: #212529; --header-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: #ffffff; --border-color: #dee2e6; --primary-color: #0d6efd; 
+            --nav-text-color: #6c757d; --input-bg: #ffffff; --muted-text: #6c757d;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212; --text-color: #e9ecef; --header-bg: rgba(33, 37, 41, 0.85);
+            --card-bg: #1e1e1e; --border-color: #495057; --primary-color: #4dabf7; 
+            --nav-text-color: #adb5bd; --input-bg: #2a2a2e; --muted-text: #adb5bd;
+        }
+        body {
+            font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease; padding-top: 70px; padding-bottom: 80px;
+        }
+        .navbar {
+            background-color: var(--header-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .navbar-brand { color: var(--text-color) !important; }
+        .btn-close { filter: invert(var(--bg-color) == '#121212' ? 1 : 0); }
+        .navbar .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .bottom-nav {
+            background-color: var(--card-bg); border-top: 1px solid var(--border-color); box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0; transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .bottom-nav .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: var(--nav-text-color); transition: color 0.2s ease; padding: 5px 0; flex-grow: 1;
+        }
+        .bottom-nav .nav-item.active { color: var(--primary-color); font-weight: 600; }
+        .bottom-nav .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+        .bottom-nav .nav-item span { font-size: 0.75rem; }
+        .card {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease; border-radius: 1rem;
+        }
+        .form-control, .form-select {
+            background-color: var(--input-bg); color: var(--text-color); border-color: var(--border-color);
+        }
+        .form-floating > .form-control:focus, .form-floating > .form-select:focus {
+             background-color: var(--input-bg); color: var(--text-color); border-color: var(--primary-color);
+             box-shadow: 0 0 0 0.2rem hsla(from var(--primary-color) h s l / 0.25);
+        }
+        .form-floating > label, .text-muted { color: var(--muted-text); }
+        .modal-content, .list-group-item { background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-color); }
+        .password-field {
+            background-color: var(--bg-color); padding: 0.5rem 1rem; border-radius: 0.5rem;
+            border: 1px solid var(--border-color); user-select: all;
+        }
+        .history-item { cursor: pointer; }
+        .history-item:hover { background-color: hsla(from var(--text-color) h s l / 0.05); }
+    </style>
+</head>
+<body>
+
+    <header class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-shop-window me-2"></i>Dalang Store</a>
+            <div class="d-flex align-items-center">
+                <button id="theme-toggle" class="btn btn-outline-secondary me-2"><i class="bi bi-moon-stars-fill"></i></button>
+                <button id="history-btn" class="btn btn-outline-secondary me-3"><i class="bi bi-database"></i></button>
+                <a href="/login" class="btn btn-primary d-flex align-items-center"><i class="bi bi-box-arrow-in-right me-2"></i><span>Login</span></a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="card shadow">
+                    <div class="card-header bg-transparent border-0 text-center py-4">
+                        <h2 class="fw-bolder mb-1"><i class="bi bi-cart-plus-fill me-2"></i>Order Panel</h2>
+                        <p class="text-muted mb-0">Isi formulir di bawah untuk membuat server baru Anda.</p>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <form id="orderForm">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="serverName" placeholder="Nama Server" required>
+                                <label for="serverName">Nama Server</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="size" required>
+                                    <option selected disabled value="">Pilih Paket...</option>
+                                    <option value="1gb">1 GB RAM - Rp 5200</option>
+                                    <option value="2gb">2 GB RAM - Rp 5200</option>
+                                    <option value="3gb">3 GB RAM - Rp 5200</option>
+                                    <option value="4gb">4 GB RAM - Rp 5200</option>
+                                    <option value="5gb">5 GB RAM - Rp 5200</option>
+                                    <option value="10gb">10 GB RAM - Rp 5200</option>
+                                    <option value="unli">Unlimited - Rp 1.200</option>
+                                </select>
+                                <label for="size">Paket Server</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="platform" required>
+                                     <option selected disabled value="">Pilih Platform...</option>
+                                     <option value="nodejs">Node.js (Bot Discord/WA)</option>
+                                     <option value="nodejs">Node.js (Bot Discord/WA)</option>
+                                     <option value="nodejs">Node.js(Bot Discord/WA)</option>
+                                </select>
+                                <label for="platform">Platform Server</label>
+                            </div>
+                            <div class="form-floating mb-3" id="maxPlayersContainer" style="display: none;">
+                                <input type="number" class="form-control" id="maxPlayers" placeholder="Jumlah Max Player" min="1" value="50">
+                                <label for="maxPlayers">Jumlah Max Player</label>
+                            </div>
+                            <button type="submit" id="submitButton" class="btn btn-primary w-100 btn-lg fw-bold py-3 mt-3">
+                                <span id="buttonText"><i class="bi bi-wallet-fill me-2"></i>Lanjut ke Pembayaran</span>
+                                <span id="buttonSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div class="modal fade" id="mainModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="modalTitle"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="modalBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav fixed-bottom d-flex justify-content-around text-center">
+        <a href="index.html" class="nav-item"><i class="bi bi-house-fill"></i><span>Beranda</span></a>
+        <a href="#" class="nav-item active"><i class="bi bi-clipboard-check-fill"></i><span>Order Panel</span></a>
+        <a href="/order-role" class="nav-item"><i class="bi bi-person-badge-fill"></i><span>Order Role</span></a>
+        <a href="https://wa.me/62895373855888?text=Halo%20Zay%20Store" target="_blank" class="nav-item"><i class="bi bi-whatsapp"></i><span>Dukungan</span></a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const LOCAL_STORAGE_KEY = 'dalangStoreHistory';
+            const HISTORY_EXPIRY_DAYS = 30;
+
+            const themeToggle = document.getElementById('theme-toggle');
+            const historyBtn = document.getElementById('history-btn');
+            const body = document.body;
+            const themeIcon = themeToggle.querySelector('i');
+            const orderForm = document.getElementById('orderForm');
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+            const mainModal = new bootstrap.Modal(document.getElementById('mainModal'));
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            let statusInterval;
+            let pendingOrderData = {};
+            
+            const applyTheme = (theme) => {
+                body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme);
+                themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+            };
+            applyTheme(localStorage.getItem('theme') || 'light');
+            themeToggle.addEventListener('click', () => applyTheme(body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+            const platformSelect = document.getElementById('platform');
+            platformSelect.addEventListener('change', () => document.getElementById('maxPlayersContainer').style.display = ['linux', 'windows'].includes(platformSelect.value) ? 'block' : 'none');
+
+            const saveOrderToHistory = (orderData) => {
+                const history = getValidHistory();
+                orderData.savedAt = Date.now();
+                history.push(orderData);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+            };
+
+            const getValidHistory = () => {
+                const history = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+                const expiryTime = Date.now() - (HISTORY_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+                return history.filter(item => item.savedAt > expiryTime);
+            };
+
+            const deleteOrderFromHistory = (uuid) => {
+                let history = getValidHistory();
+                history = history.filter(item => item.server.uuid !== uuid);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+                displayHistoryModal();
+            };
+            
+            const copyToClipboard = (text, element) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalHTML = element.innerHTML;
+                    element.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    setTimeout(() => { element.innerHTML = originalHTML; }, 2000);
+                });
+            };
+
+            orderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                buttonText.classList.add('d-none'); buttonSpinner.classList.remove('d-none'); submitButton.disabled = true;
+                pendingOrderData = {
+                    serverName: document.getElementById('serverName').value, size: document.getElementById('size').value,
+                    platform: document.getElementById('platform').value, max_players: document.getElementById('maxPlayers').value
+                };
+                try {
+                    const response = await fetch(`/api/deposit/create?paket=${pendingOrderData.size}`, { method: 'POST' });
+                    const result = await response.json();
+                    if (result.status) {
+                        pendingOrderData.id = result.data.id;
+                        displayPaymentModal(result.data);
+                    } else { alert(`Error: ${result.msg || 'Terjadi kesalahan'}`); }
+                } catch (error) { alert('Gagal menghubungi server.');
+                } finally {
+                    buttonText.classList.remove('d-none'); buttonSpinner.classList.add('d-none'); submitButton.disabled = false;
+                }
+            });
+
+            const displayPaymentModal = (data) => {
+                modalTitle.textContent = 'Selesaikan Pembayaran';
+                modalBody.innerHTML = `
+                    <div class="text-center">
+                        <p>Scan QR code di bawah ini untuk membayar.</p>
+                        <img src="${data.qr_image}" class="img-fluid mb-3" style="max-width: 250px; border-radius: 10px;" alt="QR Code">
+                        <ul class="list-group text-start mb-3">
+                            <li class="list-group-item d-flex justify-content-between"><span>Total Bayar</span><strong>Rp ${new Intl.NumberFormat('id-ID').format(data.get_balance)}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>Status</span><strong id="paymentStatusText">${data.status}</strong></li>
+                        </ul>
+                        <div id="paymentAlert" class="alert alert-info"><div class="spinner-border spinner-border-sm me-2"></div>Memeriksa status pembayaran...</div>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button id="createPanelBtn" class="btn btn-success btn-lg fw-bold" disabled>Buat Server</button>
+                        <button id="cancelPaymentBtn" class="btn btn-outline-danger">Batalkan Pesanan</button>
+                    </div>`;
+                mainModal.show();
+                
+                document.getElementById('createPanelBtn').addEventListener('click', createPanel);
+                document.getElementById('cancelPaymentBtn').addEventListener('click', cancelDeposit);
+
+                if (statusInterval) clearInterval(statusInterval);
+                statusInterval = setInterval(() => checkPaymentStatus(data.id), 10000);
+                checkPaymentStatus(data.id);
+            };
+
+            const checkPaymentStatus = async (depositId) => {
+                try {
+                    const res = await fetch(`/api/deposit/status?id=${depositId}`);
+                    const result = await res.json();
+                    const statusTextEl = document.getElementById('paymentStatusText');
+                    const createBtn = document.getElementById('createPanelBtn');
+                    const paymentAlert = document.getElementById('paymentAlert');
+
+                    if(statusTextEl) statusTextEl.textContent = result.data.status || 'checking...';
+                    
+                    if (result.status && result.data.status === 'success') {
+                        clearInterval(statusInterval);
+                        if(createBtn) createBtn.disabled = false;
+                        if(paymentAlert) {
+                            paymentAlert.className = 'alert alert-success';
+                            paymentAlert.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Pembayaran berhasil! Klik tombol Buat Server.';
+                        }
+                    } else if (result.status && ['canceled', 'expired'].includes(result.data.status)) {
+                        clearInterval(statusInterval);
+                        if(createBtn) createBtn.disabled = true;
+                        if(paymentAlert) {
+                            paymentAlert.className = 'alert alert-danger';
+                            paymentAlert.textContent = `Pembayaran ${result.data.status}.`;
+                        }
+                    }
+                } catch (err) {}
+            };
+
+            const createPanel = async () => {
+                const createBtn = document.getElementById('createPanelBtn');
+                createBtn.disabled = true;
+                createBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Membuat Server...';
+                const params = new URLSearchParams(pendingOrderData);
+                try {
+                    const response = await fetch(`/api/create/panel?${params.toString()}`);
+                    const result = await response.json();
+                    if (result.user && result.server) {
+                        saveOrderToHistory(result);
+                        displaySuccessDetails(result);
+                    } else {
+                        alert(`Gagal: ${result.msg || 'Terjadi kesalahan.'}`);
+                        createBtn.disabled = false;
+                        createBtn.innerHTML = 'Buat Server';
+                    }
+                } catch (error) {
+                    alert('Gagal menghubungi server untuk membuat panel.');
+                    createBtn.disabled = false;
+                    createBtn.innerHTML = 'Buat Server';
+                }
+            };
+            
+            const cancelDeposit = async () => {
+                const cancelBtn = document.getElementById('cancelPaymentBtn');
+                cancelBtn.disabled = true;
+                cancelBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Membatalkan...';
+                try {
+                    await fetch(`/api/deposit/cancel?id=${pendingOrderData.id}`);
+                } catch(error) {}
+                clearInterval(statusInterval);
+                alert('Pesanan telah dibatalkan.');
+                mainModal.hide();
+            };
+
+            const displaySuccessDetails = (details, fromHistory = false) => {
+                modalTitle.textContent = 'Detail Server';
+                modalBody.innerHTML = `
+                    <div class="alert alert-success text-center ${fromHistory ? 'd-none' : ''}">
+                        <i class="bi bi-check-circle-fill fs-1"></i><h4 class="alert-heading mt-2">Server Berhasil Dibuat!</h4>
+                        <p class="mb-0">Simpan detail login di bawah ini.</p>
+                    </div>
+                    <h5 class="mt-4">Detail Akun</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Panel Login</span><a href="${details.credentials.login_url}" target="_blank" class="btn btn-sm btn-outline-primary">Buka Panel <i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Username</span><code>${details.user.username}</code></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Password</span>
+                            <div class="d-flex align-items-center">
+                                <code class="password-field me-2">${details.credentials.password}</code>
+                                <button class="btn btn-sm btn-secondary copy-btn" data-copy="${details.credentials.password}"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Email</span><code>${details.user.email}</code></li>
+                    </ul>
+                    <h5 class="mt-4">Spesifikasi Server</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Nama Server</span><strong>${details.server.name}</strong></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Memory / Disk</span><span>${details.server.limits.memory} MB / ${details.server.limits.disk} MB</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>CPU Limit</span><span>${details.server.limits.cpu}%</span></li>
+                    </ul>`;
+                if (!fromHistory) orderForm.reset();
+            };
+
+            const displayHistoryModal = () => {
+                modalTitle.textContent = 'Riwayat Pesanan';
+                const history = getValidHistory();
+                if(history.length === 0) {
+                    modalBody.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-folder-x fs-1"></i><p class="mt-2 mb-0">Tidak ada riwayat pesanan.</p></div>';
+                } else {
+                    let itemsHTML = history.map(item => `
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center history-item" data-uuid="${item.server.uuid}">
+                            <div>
+                                <strong class="d-block">${item.server.name}</strong>
+                                <small class="text-muted">Dipesan: ${new Date(item.savedAt).toLocaleDateString('id-ID')}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger delete-history-btn" data-uuid="${item.server.uuid}"><i class="bi bi-trash"></i></button>
+                        </div>
+                    `).join('');
+                    modalBody.innerHTML = `<div class="list-group">${itemsHTML}</div>`;
+                }
+                mainModal.show();
+            };
+            
+            historyBtn.addEventListener('click', displayHistoryModal);
+            
+            modalBody.addEventListener('click', (e) => {
+                const viewTarget = e.target.closest('.history-item');
+                const deleteTarget = e.target.closest('.delete-history-btn');
+                const copyBtn = e.target.closest('.copy-btn');
+                
+                if (deleteTarget) {
+                    e.stopPropagation();
+                    if (confirm('Yakin ingin menghapus riwayat ini?')) deleteOrderFromHistory(deleteTarget.dataset.uuid);
+                } else if (viewTarget) {
+                    const item = getValidHistory().find(h => h.server.uuid === viewTarget.dataset.uuid);
+                    if (item) displaySuccessDetails(item, true);
+                } else if (copyBtn) {
+                    copyToClipboard(copyBtn.dataset.copy, copyBtn);
+                }
+            });
+
+            document.getElementById('mainModal').addEventListener('hidden.bs.modal', () => {
+                if (statusInterval) clearInterval(statusInterval);
+            });
+        });
+    </script>
+</body>
+</html>
