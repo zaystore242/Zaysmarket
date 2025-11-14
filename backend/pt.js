@@ -6,7 +6,10 @@ const axios = require("axios");
 const cloudscraper = require("cloudscraper");
 const qs = require("querystring");
 
-
+const upgradePrices = {
+  reseller: { admin: 10000, pt: 15000 },
+  admin: { pt: 20000 },
+};
 const {
   createPterodactylUser,
   createPterodactylServer,
@@ -31,7 +34,122 @@ function checkRole(role) {
     return res.status(403).send("Akses ditolak");
   };
 }
+router.post("/upgrade", isLoggedIn, async (req, res) => {
+  try {
+    const { targetRole } = req.body;
+    if (!targetRole) return res.status(400).json({ status: false, msg: "Target role wajib diisi" });
 
+    const currentUser = await User.findById(req.session.user.id);
+    if (!currentUser) return res.status(404).json({ status: false, msg: "User tidak ditemukan" });
+
+    if (targetRole === "owner") return res.status(400).json({ status: false, msg: "Tidak bisa upgrade ke owner" });
+
+    const userRole = currentUser.role;
+    if (!upgradePrices[userRole] || !upgradePrices[userRole][targetRole]) {
+      return res.status(400).json({ status: false, msg: `Tidak bisa upgrade dari ${userRole} ke ${targetRole}` });
+    }
+    const nominal = upgradePrices[userRole][targetRole];
+
+    const reff_id = "REF" + Date.now();
+    const formData = qs.stringify({
+      api_key: API_KEY,
+      reff_id,
+      nominal,
+      type: "ewallet",
+      metode: "qrisfast",
+    });
+
+    const depositResponse = await cloudscraper({
+      method: "POST",
+      url: "https://atlantich2h.com/deposit/create",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData,
+    });
+    const depositData = JSON.parse(depositResponse);
+
+    res.json({
+      status: true,
+      msg: "Deposit dibuat, cek status otomatis setiap 3 detik",
+      deposit: depositData.data,
+    });
+
+    const interval = setInterval(async () => {
+      try {
+        const formStatus = qs.stringify({ api_key: API_KEY, id: depositData.data.id });
+        const statusResponse = await cloudscraper({
+          method: "POST",
+          url: "https://atlantich2h.com/deposit/status",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formStatus,
+        });
+        const statusData = JSON.parse(statusResponse);
+
+        if (["processing", "success"].includes(statusData.data.status.toLowerCase())) {
+
+          currentUser.role = targetRole;
+          await currentUser.save();
+          clearInterval(interval);
+          console.log(`User ${currentUser.username} berhasil diupgrade ke ${targetRole}`);
+        } else if (statusData.data.status.toLowerCase() === "failed") {
+          clearInterval(interval);
+          console.log(`Deposit ${depositData.data.id} gagal`);
+        }
+      } catch (err) {
+        console.error("Error cek status deposit:", err.message);
+      }
+    }, 3000); 
+  } catch (err) {
+    console.error("Error upgrade user:", err.message);
+    return res.status(500).json({ status: false, msg: "Terjadi kesalahan", error: err.message });
+  }
+});
+
+
+router.post("/status", async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ status: false, msg: "ID Deposit wajib diisi" });
+    }
+
+    const formData = qs.stringify({
+      api_key: API_KEY,
+      id
+    });
+
+    const response = await cloudscraper({
+      method: "POST",
+      url: "https://atlantich2h.com/deposit/status",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      },
+      body: formData
+    });
+
+    const apiRes = JSON.parse(response);
+
+    res.json({
+      status: apiRes.status,
+      data: {
+        id: apiRes.data.id,
+        reff_id: apiRes.data.reff_id,
+        nominal: apiRes.data.nominal,
+        tambahan: apiRes.data.tambahan,
+        fee: apiRes.data.fee,
+        get_balance: apiRes.data.get_balance,
+        metode: apiRes.data.metode,
+        status: apiRes.data.status,
+        created_at: apiRes.data.created_at
+      },
+      code: apiRes.code
+    });
+  } catch (err) {
+    console.error("Error cek status:", err.message);
+    res.status(500).json({ status: false, msg: "Terjadi kesalahan", error: err.message });
+  }
+});
 router.post("/cpanel", isLoggedIn, async (req, res) => {
   console.log("📥 [POST /cpanel] Data diterima:", req.body);
   const { serverName, userId, ram, disk, cpu, platform, max_players } = req.body;
@@ -168,3 +286,4 @@ router.get("/add/user", isLoggedIn, checkRole("pt"), async (req, res) => {
 });
 
 module.exports = router;
+
