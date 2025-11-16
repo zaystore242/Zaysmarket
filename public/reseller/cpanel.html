@@ -1,0 +1,491 @@
+
+<!DOCTYPE html>
+
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>Buat Panel Baru</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+:root {
+--theme-bg: #F7F9FC;
+--sidebar-bg: #FFFFFF;
+--content-bg: #FFFFFF;
+--text-primary: #1A202C;
+--text-secondary: #718096;
+--border-color: #E2E8F0;
+--primary-color: #3B82F6;
+--primary-color-light: #EFF6FF;
+--danger-color: #E53E3E;
+--danger-color-light: #FFF5F5;
+--success-color: #38A169;
+--success-color-light: #F0FFF4;
+--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+--transition-speed: 0.3s;
+}
+
+html[data-theme='dark'] {
+        --theme-bg: #1A202C;
+        --sidebar-bg: #2D3748;
+        --content-bg: #2D3748;
+        --text-primary: #F7FAFC;
+        --text-secondary: #A0AEC0;
+        --border-color: #4A5568;
+        --primary-color: #4299E1;
+        --primary-color-light: #2C5282;
+        --danger-color: #FC8181;
+        --danger-color-light: rgba(252, 129, 129, 0.1);
+        --success-color: #68D391;
+        --success-color-light: rgba(104, 211, 145, 0.1);
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--theme-bg);
+        color: var(--text-primary);
+        transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+    }
+
+    .wrapper { display: flex; min-height: 100vh; }
+    .sidebar {
+        width: 260px;
+        background-color: var(--sidebar-bg);
+        border-right: 1px solid var(--border-color);
+        padding: 1.5rem 1rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform var(--transition-speed) ease, background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        padding: 0 0.5rem 1.5rem 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-body { flex-grow: 1; display: flex; flex-direction: column; }
+    .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+    .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .sidebar-nav a .bi { font-size: 1.2rem; }
+    .sidebar-nav a:hover { background-color: var(--primary-color-light); color: var(--primary-color); }
+    .sidebar-nav a.active { background-color: var(--primary-color-light); color: var(--primary-color); }
+    .sidebar-footer { margin-top: auto; }
+    .theme-switcher {
+        background-color: var(--theme-bg);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .theme-switcher .theme-label { font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); margin-left: 0.5rem; }
+    #theme-toggle {
+        border: none;
+        background: var(--content-bg);
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 0.4rem 0.5rem;
+        transition: all 0.2s ease;
+    }
+    #theme-toggle:hover { color: var(--primary-color); }
+    #theme-toggle .bi-sun-fill { display: none; }
+    html[data-theme='dark'] #theme-toggle .bi-sun-fill { display: inline-block; }
+    html[data-theme='dark'] #theme-toggle .bi-moon-fill { display: none; }
+    .logout-section { padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--border-color); }
+    .logout-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .logout-link:hover { background-color: var(--danger-color-light); color: var(--danger-color); }
+    .logout-link .bi { font-size: 1.2rem; }
+
+    .main-content {
+        margin-left: 260px;
+        flex-grow: 1;
+        padding: 2rem;
+        width: calc(100% - 260px);
+        transition: margin-left var(--transition-speed) ease;
+    }
+
+    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .page-title-wrapper { display: flex; align-items: center; gap: 1rem; }
+    #menu-toggle { display: none; background: transparent; border: none; font-size: 1.75rem; color: var(--text-primary); cursor: pointer; }
+    .page-title { font-size: 2rem; font-weight: 800; margin: 0; color: var(--text-primary); }
+    
+    .card {
+        background-color: var(--content-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow);
+        transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+    }
+    
+    .form-label { font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .form-control, .form-select {
+        background-color: var(--theme-bg);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: var(--theme-bg);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    }
+    .form-control[readonly] { background-color: var(--border-color); opacity: 0.7; }
+
+    .btn-primary { font-weight: 700; }
+    
+    .result-card {
+        border: 1px solid var(--success-color);
+        background-color: var(--success-color-light);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+    }
+    .result-title { color: var(--success-color); font-weight: 700; margin-bottom: 1.5rem; }
+    .result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    .result-item .label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+    .result-item .value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        word-break: break-all;
+    }
+    .password-field { display: flex; align-items: center; gap: 0.5rem; }
+    .copy-btn {
+        border: none;
+        background: var(--border-color);
+        color: var(--text-secondary);
+        border-radius: 6px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .copy-btn:hover { background: var(--primary-color-light); color: var(--primary-color); }
+
+    .overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 999; opacity: 0; visibility: hidden; transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease; }
+    .overlay.active { opacity: 1; visibility: visible; }
+    
+    @media (max-width: 992px) {
+        .sidebar { transform: translateX(-100%); }
+        .sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
+        .main-content { margin-left: 0; width: 100%; padding: 1.5rem; }
+        #menu-toggle { display: block; }
+    }
+</style>
+</head>
+<body>
+<div class="wrapper">
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<i class="bi bi-shield-check"></i>
+<span>Panel Pengguna</span>
+</div>
+<div class="sidebar-body">
+<ul class="sidebar-nav">
+<li><a href="/reseller"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+<li><a href="#" class="active"><i class="bi bi-plus-square-dotted"></i>Buat Panel</a></li>
+<li><a href="/upgrade"><i class="bi bi-arrow-up-circle"></i> Upgrade</a></li>
+
+
+</ul>
+<div class="sidebar-footer">
+<div class="theme-switcher">
+<span class="theme-label">Mode</span>
+<button id="theme-toggle" aria-label="Toggle theme">
+<i class="bi bi-moon-fill"></i>
+<i class="bi bi-sun-fill"></i>
+</button>
+</div>
+<div class="logout-section">
+<a href="/logout" class="logout-link"><i class="bi bi-box-arrow-left"></i><span>Logout</span></a>
+</div>
+</div>
+</div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="page-title-wrapper">
+                <button id="menu-toggle"><i class="bi bi-list"></i></button>
+                <h1 class="page-title">Buat Panel Baru</h1>
+            </div>
+        </header>
+        
+        <div class="card p-4 p-md-5">
+            <form id="cpanelForm">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <label for="serverName" class="form-label">Nama Server</label>
+                        <input type="text" id="serverName" class="form-control" placeholder="Contoh: Server Komunitas Saya" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ramPackage" class="form-label">Pilih Paket RAM</label>
+                        <select id="ramPackage" class="form-select" required>
+                            <option value="1">1 GB</option><option value="2">2 GB</option><option value="3">3 GB</option>
+                            <option value="4">4 GB</option><option value="5">5 GB</option><option value="6">6 GB</option>
+                            <option value="7">7 GB</option><option value="8">8 GB</option><option value="9">9 GB</option>
+                            <option value="10">10 GB</option><option value="unli">Unlimited</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="platform" class="form-label">Platform</label>
+                        <select id="platform" class="form-select" required>
+                            <option value="nodejs">NodeJS</option>
+                            <option value="linux">SA-MP (Linux)</option>
+                            <option value="windows">SA-MP (Windows)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label for="ram" class="form-label">RAM (MB)</label><input type="number" id="ram" class="form-control" readonly></div>
+                    <div class="col-md-4"><label for="disk" class="form-label">Disk (MB)</label><input type="number" id="disk" class="form-control" readonly></div>
+                    <div class="col-md-4"><label for="cpu" class="form-label">CPU (%)</label><input type="number" id="cpu" class="form-control" readonly></div>
+                    <div class="col-md-6" id="maxPlayersField" style="display:none;">
+                        <label for="max_players" class="form-label">Max Players</label>
+                        <input type="number" id="max_players" class="form-control" placeholder="Contoh: 100">
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+                            <i class="bi bi-check-lg me-2"></i> Buat Panel Sekarang
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div id="messageBox" class="mt-4"></div>
+        <div id="responseContainer" class="mt-4" style="display: none;"></div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("overlay");
+        const menuToggle = document.getElementById("menu-toggle");
+
+        const toggleSidebar = () => {
+            sidebar.classList.toggle("open");
+            overlay.classList.toggle("active");
+        };
+
+        menuToggle.addEventListener("click", toggleSidebar);
+        overlay.addEventListener("click", toggleSidebar);
+        
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+
+        const applyTheme = (theme) => {
+            htmlEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        };
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+        
+        const ramPackage = document.getElementById("ramPackage");
+        const ramInput = document.getElementById("ram");
+        const diskInput = document.getElementById("disk");
+        const cpuInput = document.getElementById("cpu");
+        const platformSelect = document.getElementById("platform");
+        const maxPlayersField = document.getElementById("maxPlayersField");
+        const form = document.getElementById("cpanelForm");
+        const messageBox = document.getElementById("messageBox");
+        const responseContainer = document.getElementById("responseContainer");
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        const calculateResources = () => {
+            const value = ramPackage.value;
+            if (value === "unli") {
+                ramInput.value = 0;
+                diskInput.value = 0;
+                cpuInput.value = 0;
+            } else {
+                const gb = parseInt(value);
+                ramInput.value = gb * 1000 + 25;
+                diskInput.value = gb * 1000 + 25;
+                cpuInput.value = gb * 50;
+            }
+        };
+        
+        ramPackage.addEventListener("change", calculateResources);
+        
+        platformSelect.addEventListener("change", () => {
+            const isSamp = platformSelect.value === "linux" || platformSelect.value === "windows";
+            maxPlayersField.style.display = isSamp ? "block" : "none";
+        });
+
+        const displaySuccessResponse = (data) => {
+            const { user, server, credentials } = data;
+            responseContainer.innerHTML = `
+                <div class="result-card">
+                    <h4 class="result-title"><i class="bi bi-check-circle-fill me-2"></i>Panel Berhasil Dibuat!</h4>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="label">Nama Server</div>
+                            <div class="value">${server.name} (ID: ${server.id})</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Username Panel</div>
+                            <div class="value">${user.username} (ID: ${user.id})</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Email Terdaftar</div>
+                            <div class="value">${user.email}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Password</div>
+                            <div class="value password-field">
+                                <code>${credentials.password}</code>
+                                <button class="copy-btn" data-password="${credentials.password}" title="Salin Password"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Alokasi Memori</div>
+                            <div class="value">${server.limits.memory} MB RAM / ${server.limits.disk} MB Disk</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Alokasi CPU</div>
+                            <div class="value">${server.limits.cpu}%</div>
+                        </div>
+                    </div>
+                    <a href="${credentials.login_url}" target="_blank" rel="noopener noreferrer" class="btn btn-success w-100 mt-4">
+                        <i class="bi bi-box-arrow-up-right me-2"></i>Buka Panel Login
+                    </a>
+                </div>`;
+            responseContainer.style.display = 'block';
+        };
+
+        const showAlert = (message, type = 'danger') => {
+            messageBox.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+        };
+
+        const setLoadingState = (isLoading) => {
+            const spinner = submitButton.querySelector('.spinner-border');
+            const icon = submitButton.querySelector('.bi-check-lg');
+            if (isLoading) {
+                submitButton.disabled = true;
+                spinner.style.display = 'inline-block';
+                icon.style.display = 'none';
+            } else {
+                submitButton.disabled = false;
+                spinner.style.display = 'none';
+                icon.style.display = 'inline-block';
+            }
+        };
+        
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            setLoadingState(true);
+            messageBox.innerHTML = "";
+            responseContainer.style.display = "none";
+
+            const payload = {
+                serverName: document.getElementById("serverName").value,
+                ram: parseInt(ramInput.value),
+                disk: parseInt(diskInput.value),
+                cpu: parseInt(cpuInput.value),
+                platform: platformSelect.value,
+                max_players: document.getElementById("max_players").value || 0
+            };
+
+            try {
+                const res = await fetch("/reseller/cpanel", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok && !data.error) {
+                    displaySuccessResponse(data);
+                    form.reset();
+                    calculateResources();
+                } else {
+                    showAlert(data.error || "Terjadi kesalahan saat membuat panel.");
+                }
+            } catch (err) {
+                showAlert("Tidak dapat terhubung ke server. Silakan coba lagi.");
+            } finally {
+                setLoadingState(false);
+            }
+        });
+
+        responseContainer.addEventListener('click', function(e) {
+            const copyButton = e.target.closest('.copy-btn');
+            if (copyButton) {
+                const password = copyButton.dataset.password;
+                navigator.clipboard.writeText(password).then(() => {
+                    copyButton.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    setTimeout(() => {
+                        copyButton.innerHTML = '<i class="bi bi-clipboard"></i>';
+                    }, 2000);
+                });
+            }
+        });
+
+        calculateResources();
+    });
+</script>
+</body>
+</html>
